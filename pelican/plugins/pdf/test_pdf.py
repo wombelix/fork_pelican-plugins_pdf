@@ -42,3 +42,36 @@ class TestPdfGeneration(unittest.TestCase):
             assert os.path.exists(
                 os.path.join(self.temp_path, "pdf", "my-super-post-md.pdf")
             )
+
+
+class TestStripElementsWithClasses(unittest.TestCase):
+    """Test class for the PDF_STRIP_ELEMENTS_WITH_CLASSES setting."""
+
+    def test_strip_elements_with_classes(self):
+        cases = [
+            {
+                "name": "setting not set",
+                "override": {},
+                "expected": [],
+            },
+            {
+                "name": "setting set",
+                "override": {"PDF_STRIP_ELEMENTS_WITH_CLASSES": ["no-pdf"]},
+                "expected": ["no-pdf"],
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(case["name"]):
+                settings = read_settings(override=case["override"])
+                # The constructor writes no files, so output_path is not created
+                generator = pdf.PdfGenerator(
+                    context={},
+                    settings=settings,
+                    path=os.path.join(CUR_DIR, "test_data"),
+                    theme=settings["THEME"],
+                    output_path=os.path.join(CUR_DIR, "output"),
+                )
+                assert (
+                    generator.pdfcreator.strip_elements_with_classes == case["expected"]
+                )
